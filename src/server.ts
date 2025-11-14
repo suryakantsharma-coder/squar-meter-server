@@ -6,6 +6,7 @@ import { connectDB } from './database';
 import authRoutes from './routes/auth.routes';
 import projectRoutes from './routes/project.routes';
 import uploadRouter from './routes/upload.routes';
+import unitsRouter from './routes/unit.routes';
 import cors from 'cors';
 
 const app = express();
@@ -25,6 +26,7 @@ app.use('/uploads', express.static('uploads'));
 app.use('/api/auth', authRoutes);
 app.use('/api/project', projectRoutes);
 app.use('/api/upload', uploadRouter);
+app.use('/api/unit', unitsRouter);
 
 app.get('/', (req, res) => res.json({ message: 'Server running 🚀' }));
 
