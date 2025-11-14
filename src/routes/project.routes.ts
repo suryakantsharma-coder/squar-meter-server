@@ -44,7 +44,6 @@ router.get('/:name', authenticateToken, async (req: any, res) => {
       return res.status(400).json({ message: 'Project name is required' });
     }
 
-    // Assuming getProjects can also handle filters by name
     const project = await getProjects({ name: { $regex: new RegExp(`^${name}$`, 'i') } });
 
     if (!project || project.length === 0) {
