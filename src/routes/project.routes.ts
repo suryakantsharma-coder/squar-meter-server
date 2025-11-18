@@ -16,9 +16,10 @@ const router = express.Router();
 
 router.get('/', authenticateToken, async (req: any, res) => {
   try {
-    const { type, status, state } = req.query;
+    const { name, type, status, state } = req.query;
 
     const filters: Record<string, any> = {};
+    if (name) filters.name = { $regex: new RegExp(name as string, 'i') };
     if (type) filters.type = type;
     if (status) filters.status = status;
     if (state) filters.state = state;
@@ -102,6 +103,33 @@ router.post('/add_new_project', authenticateToken, async (req: any, res) => {
     console.log('Created Project:', project);
     res.status(201).json({ message: 'Project Created', project });
   } catch (err: any) {
+    res.status(400).json({ message: err.message });
+  }
+});
+
+// create a search route to search projects by name, type, status, state
+router.get('/search', authenticateToken, async (req: any, res) => {
+  try {
+    const { name, type, status, state } = req.query;
+    console.log({ name, type, status, state });
+
+    const filters: Record<string, any> = {};
+    if (name) filters.name = { $regex: new RegExp(name as string, 'i') };
+    if (type) filters.type = type;
+    if (status) filters.status = status;
+    if (state) filters.state = state;
+
+    console.log({ filters });
+
+    const projects = await getProjects(filters);
+
+    res.status(200).json({
+      message: 'Projects fetched successfully',
+      total: projects?.length,
+      projects,
+    });
+  } catch (err: any) {
+    console.error('Error searching projects:', err);
     res.status(400).json({ message: err.message });
   }
 });
