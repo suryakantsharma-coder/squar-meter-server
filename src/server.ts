@@ -8,6 +8,7 @@ import projectRoutes from './routes/project.routes';
 import uploadRouter from './routes/upload.routes';
 import unitsRouter from './routes/unit.routes';
 import leadRoutes from './routes/lead.routes';
+import bookingRoutes from './routes/booking.routes';
 import cors from 'cors';
 
 const app = express();
@@ -29,6 +30,7 @@ app.use('/api/project', projectRoutes);
 app.use('/api/upload', uploadRouter);
 app.use('/api/unit', unitsRouter);
 app.use('/api/leads', leadRoutes);
+app.use('/api/bookings', bookingRoutes);
 
 app.get('/', (req, res) => res.json({ message: 'Server running 🚀' }));
 

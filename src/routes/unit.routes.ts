@@ -40,6 +40,23 @@ router.get('/:id', authenticateToken, async (req: any, res) => {
   }
 });
 
+/** cretae a search route for unit */
+router.get('/:id/:term', authenticateToken, async (req: any, res) => {
+  try {
+    const { term, id } = req.params;
+    const units = await UnitsService.getUnitByIdSearch(id, term);
+
+    res.status(200).json({
+      message: 'Units fetched successfully',
+      total: units.length,
+      units,
+    });
+  } catch (err: any) {
+    console.error('Error searching units:', err);
+    res.status(400).json({ message: err.message });
+  }
+});
+
 /** Create new unit */
 router.post('/create', authenticateToken, async (req: any, res) => {
   try {

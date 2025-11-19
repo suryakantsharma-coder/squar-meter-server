@@ -30,6 +30,19 @@ class UnitsService {
     }
   }
 
+  async getUnitByIdSearch(unitId: string, searchTerm: string) {
+    try {
+      return await Unit.findById(unitId).find({
+        $or: [
+          { unitNumber: { $regex: new RegExp(searchTerm, 'i') } },
+          { block: { $regex: new RegExp(searchTerm, 'i') } },
+        ],
+      });
+    } catch (err: any) {
+      throw new Error(err.message || 'Failed to fetch unit');
+    }
+  }
+
   async updateUnit(unitId: string, updateData: any) {
     try {
       return await Unit.findByIdAndUpdate(unitId, updateData, { new: true });
