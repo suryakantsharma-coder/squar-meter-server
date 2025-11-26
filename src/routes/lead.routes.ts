@@ -89,4 +89,59 @@ router.get('/', authenticateToken, async (req: any, res) => {
   }
 });
 
+// create a search route here for the leads like get request also remove ase sensitive
+
+// router.get('/search', authenticateToken, async (req: any, res) => {
+//   try {
+//     const { query } = req.query;
+//     if (!query) throw new Error('Search query is required');
+
+//     const leads = await Lead.find({
+//       $or: [
+//         { 'contact.name': { $regex: query, $options: 'i' } },
+//         { 'contact.email': { $regex: query, $options: 'i' } },
+//         { 'contact.phone': { $regex: query, $options: 'i' } },
+//         { company: { $regex: query, $options: 'i' } },
+//       ],
+//     });
+
+//     res.status(200).json({
+//       message: 'Search results',
+//       total: leads.length,
+//       leads,
+//     });
+//   } catch (err: any) {
+//     res.status(400).json({ message: err.message });
+//   }
+// });
+
+function escapeRegex(text: string) {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // escape regex metacharacters
+}
+
+router.get('/search', authenticateToken, async (req, res) => {
+  try {
+    const { query } = req.query;
+    if (!query) throw new Error('Search query is required');
+
+    console.log({ query });
+
+    const escaped = escapeRegex(query as string);
+    const regex = new RegExp(escaped, 'i'); // case-insensitive
+
+    const leads = await Lead.find({
+      $or: [{ name: regex }, { 'contact.phone': regex }],
+    })
+      .lean()
+      .populate('interestedProjects.units');
+
+    res.status(200).json({ message: 'Search results', total: leads.length, leads });
+  } catch (err: any) {
+    res.status(400).json({ message: err.message });
+  }
+});
+
+// aslo create a curl of search route
+// curl -X GET "http://localhost:3000/leads/search?query=example" -H "Authorization: Bearer <token>"
+
 export default router;
