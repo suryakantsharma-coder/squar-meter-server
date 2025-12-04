@@ -12,7 +12,7 @@ import {
   updateBooking,
 } from '../services/booking.service';
 
-import { IBooking } from '../models/booking.model';
+import { Booking, IBooking } from '../models/booking.model';
 
 const router = express.Router();
 
@@ -90,18 +90,56 @@ router.delete('/delete/:id', authenticateToken, async (req: any, res) => {
 /**
  * Get ALL bookings with optional filters
  */
+
+// make this as a pagination so data recieved is limited
+// router.get('/', authenticateToken, async (req: any, res) => {
+//   try {
+//     const filters = req.query || {};
+//     const page = parseInt(req.query.page as string) || 1;
+//     const bookings = await getAllBookings(filters);
+
+//     res.status(200).json({
+//       message: 'Bookings fetched successfully',
+//       total: bookings.length,
+//       bookings,
+//     });
+//   } catch (err: any) {
+//     res.status(400).json({ message: err.message });
+//   }
+// });
+
 router.get('/', authenticateToken, async (req: any, res) => {
   try {
-    const filters = req.query || {};
+    // Extract pagination params first
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 20;
+    const skip = (page - 1) * limit;
 
-    const bookings = await getAllBookings(filters);
+    // Create filters object without pagination params
+    const filters: any = { ...req.query };
+    delete filters.page;
+    delete filters.limit;
+
+    // total documents count with filters
+    const total = await Booking.countDocuments(filters);
+
+    // paginated data
+    const bookings = await Booking.find(filters)
+      .skip(skip)
+      .limit(limit)
+      .sort({ createdAt: -1 })
+      .lean(); // Use lean() for better performance
 
     res.status(200).json({
       message: 'Bookings fetched successfully',
-      total: bookings.length,
+      total,
+      page,
+      limit,
+      pages: Math.ceil(total / limit),
       bookings,
     });
   } catch (err: any) {
+    console.error('Error fetching bookings:', err); // Add logging
     res.status(400).json({ message: err.message });
   }
 });

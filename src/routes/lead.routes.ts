@@ -75,16 +75,54 @@ router.delete('/delete/:id', authenticateToken, async (req: any, res) => {
   }
 });
 
+// router.get('/', authenticateToken, async (req: any, res) => {
+//   try {
+//     const filters = req.query || {};
+//     const leads = await getLeads(filters);
+//     res.status(200).json({
+//       message: 'Leads fetched successfully',
+//       total: leads.length,
+//       leads,
+//     });
+//   } catch (err: any) {
+//     res.status(400).json({ message: err.message });
+//   }
+// });
+
 router.get('/', authenticateToken, async (req: any, res) => {
   try {
-    const filters = req.query || {};
-    const leads = await getLeads(filters);
+    // Extract pagination params first
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 20;
+    const skip = (page - 1) * limit;
+
+    // Create filters object without pagination params
+    const filters: any = { ...req.query };
+    delete filters.page;
+    delete filters.limit;
+
+    // total documents count with filters
+    const total = await Lead.countDocuments(filters);
+
+    // paginated data
+    const leads = await Lead.find(filters)
+      .skip(skip)
+      .limit(limit)
+      .sort({ createdAt: -1 })
+      .lean()
+      .populate('interestedProjects.projectId')
+      .populate('interestedProjects.units'); // Use lean() for better performance
+
     res.status(200).json({
       message: 'Leads fetched successfully',
-      total: leads.length,
+      total,
+      page,
+      limit,
+      pages: Math.ceil(total / limit),
       leads,
     });
   } catch (err: any) {
+    console.error('Error fetching leads:', err);
     res.status(400).json({ message: err.message });
   }
 });

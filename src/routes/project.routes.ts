@@ -9,26 +9,62 @@ import {
   getProjects,
   updateProject,
 } from '../services/project.service';
-import { IProject } from '../models/project.model';
+import { IProject, Project } from '../models/project.model';
 import config from '../config';
 
 const router = express.Router();
 
+// router.get('/', authenticateToken, async (req: any, res) => {
+//   try {
+//     const { name, type, status, state } = req.query;
+
+//     const filters: Record<string, any> = {};
+//     if (name) filters.name = { $regex: new RegExp(name as string, 'i') };
+//     if (type) filters.type = type;
+//     if (status) filters.status = status;
+//     if (state) filters.state = state;
+
+//     const projects = await getProjects(filters);
+
+//     res.status(200).json({
+//       message: 'Projects fetched successfully',
+//       total: projects?.length,
+//       projects,
+//     });
+//   } catch (err: any) {
+//     console.error('Error fetching projects:', err);
+//     res.status(400).json({ message: err.message });
+//   }
+// });
+
 router.get('/', authenticateToken, async (req: any, res) => {
   try {
-    const { name, type, status, state } = req.query;
+    // Extract pagination params first
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 20;
+    const skip = (page - 1) * limit;
 
-    const filters: Record<string, any> = {};
-    if (name) filters.name = { $regex: new RegExp(name as string, 'i') };
-    if (type) filters.type = type;
-    if (status) filters.status = status;
-    if (state) filters.state = state;
+    // Create filters object without pagination params
+    const filters: any = { ...req.query };
+    delete filters.page;
+    delete filters.limit;
 
-    const projects = await getProjects(filters);
+    // total documents count with filters
+    const total = await Project.countDocuments(filters);
+
+    // paginated data
+    const projects = await Project.find(filters)
+      .skip(skip)
+      .limit(limit)
+      .sort({ createdAt: -1 })
+      .lean(); // Use lean() for better performance
 
     res.status(200).json({
       message: 'Projects fetched successfully',
-      total: projects?.length,
+      total,
+      page,
+      limit,
+      pages: Math.ceil(total / limit),
       projects,
     });
   } catch (err: any) {
