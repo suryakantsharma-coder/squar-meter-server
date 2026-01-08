@@ -11,6 +11,7 @@ router.post('/register', async (req, res) => {
     const user = await registerUser(email, password, name);
     res.status(201).json({ message: 'User created', user });
   } catch (err) {
+    // @ts-expect-error -- err type
     res.status(400).json({ message: err.message });
   }
 });

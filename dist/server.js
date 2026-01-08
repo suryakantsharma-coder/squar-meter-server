@@ -20,7 +20,7 @@ app.use((0, helmet_1.default)());
 app.use(express_1.default.json());
 app.use((0, cookie_parser_1.default)());
 app.use((0, cors_1.default)({
-    origin: 'http://localhost:3000', // your frontend URL
+    origin: ['http://localhost:3000', 'https://zameen-brown.vercel.app'], // your frontend URL
     credentials: true, // if you use cookies or Authorization headers
 }));
 app.use('/uploads', express_1.default.static('uploads'));
