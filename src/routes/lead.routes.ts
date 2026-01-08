@@ -127,6 +127,55 @@ router.get('/', authenticateToken, async (req: any, res) => {
   }
 });
 
+// router.get('/:id', authenticateToken, async (req: any, res) => {
+//   try {
+//     const { id } = req.params;
+//     if (!id) throw new Error('Lead ID is required');
+
+//     const lead = await Lead.findById(id)
+//       .lean()
+//       .populate('interestedProjects.projectId')
+//       .populate('interestedProjects.units');
+
+//     console.log({ lead, id });
+
+//     if (!lead) {
+//       return res.status(404).json({ message: 'Lead not found' });
+//     }
+
+//     res.status(200).json({ message: 'Lead fetched successfully', lead });
+//   } catch (err: any) {
+//     res.status(400).json({ message: err.message });
+//   }
+// });
+
+router.get('/:id', authenticateToken, async (req: any, res) => {
+  try {
+    const { id } = req.params;
+    if (!id) throw new Error('Unit ID is required');
+
+    const lead = await Lead.find({
+      'interestedProjects.units': id,
+    })
+      .lean()
+      .populate('interestedProjects.projectId')
+      .populate('interestedProjects.units');
+
+    if (!lead) {
+      return res.status(404).json({ message: 'Lead not found for this unit' });
+    }
+
+    console.log({ lead, id });
+
+    res.status(200).json({
+      message: 'Lead fetched successfully by unit',
+      lead,
+    });
+  } catch (err: any) {
+    res.status(400).json({ message: err.message });
+  }
+});
+
 // create a search route here for the leads like get request also remove ase sensitive
 
 // router.get('/search', authenticateToken, async (req: any, res) => {
