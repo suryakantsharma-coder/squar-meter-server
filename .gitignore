@@ -11,7 +11,7 @@ pnpm-debug.log*
 package-lock.json
 
 # Build output
-dist/
+# dist/
 build/
 out/
 coverage/
