@@ -27,7 +27,7 @@ router.post('/login', async (req, res) => {
     );
     res.json({ accessToken, refreshToken, user });
   } catch (err) {
-    res.status(401).json({ message: err.message });
+    res.status(401).json({ message: err instanceof Error ? err.message : 'Unknown error' });
   }
 });
 
@@ -37,7 +37,7 @@ router.post('/refresh', async (req, res) => {
     const newAccess = await refreshAccessToken(refreshToken);
     res.json({ accessToken: newAccess });
   } catch (err) {
-    res.status(403).json({ message: err.message });
+    res.status(403).json({ message: err instanceof Error ? err.message : 'Unknown error' });
   }
 });
 
@@ -46,7 +46,7 @@ router.post('/logout', authenticateToken, async (req: any, res) => {
     await logoutUser(new Types.ObjectId(req.user.id), req.body.refreshToken);
     res.json({ message: 'Logged out' });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ message: err instanceof Error ? err.message : 'Unknown error' });
   }
 });
 

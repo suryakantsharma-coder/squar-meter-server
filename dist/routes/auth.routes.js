@@ -15,6 +15,7 @@ router.post('/register', async (req, res) => {
         res.status(201).json({ message: 'User created', user });
     }
     catch (err) {
+        // @ts-expect-error -- err type
         res.status(400).json({ message: err.message });
     }
 });
@@ -25,7 +26,7 @@ router.post('/login', async (req, res) => {
         res.json({ accessToken, refreshToken, user });
     }
     catch (err) {
-        res.status(401).json({ message: err.message });
+        res.status(401).json({ message: err instanceof Error ? err.message : 'Unknown error' });
     }
 });
 router.post('/refresh', async (req, res) => {
@@ -35,7 +36,7 @@ router.post('/refresh', async (req, res) => {
         res.json({ accessToken: newAccess });
     }
     catch (err) {
-        res.status(403).json({ message: err.message });
+        res.status(403).json({ message: err instanceof Error ? err.message : 'Unknown error' });
     }
 });
 router.post('/logout', auth_1.authenticateToken, async (req, res) => {
@@ -44,7 +45,7 @@ router.post('/logout', auth_1.authenticateToken, async (req, res) => {
         res.json({ message: 'Logged out' });
     }
     catch (err) {
-        res.status(500).json({ message: err.message });
+        res.status(500).json({ message: err instanceof Error ? err.message : 'Unknown error' });
     }
 });
 exports.default = router;

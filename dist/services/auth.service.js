@@ -29,8 +29,10 @@ async function loginUser(email, password, ip, ua) {
     console.log({ valid, password, s: user.passwordHash });
     if (!valid)
         throw new Error('Invalid credentials');
+    // @ts-expect-error -- config.jwtSecret is a string
     const accessToken = jsonwebtoken_1.default.sign({ id: user._id, email: user.email, role: user.role }, config_1.default.jwtSecret, { expiresIn: config_1.default.accessExpire });
     console.log({ accessToken });
+    // @ts-expect-error -- config.jwtSecret is a string
     const refreshToken = jsonwebtoken_1.default.sign({ id: user._id }, config_1.default.jwtSecret, {
         expiresIn: config_1.default.refreshExpire,
     });
@@ -58,6 +60,7 @@ async function refreshAccessToken(refreshToken) {
         const session = await session_model_1.Session.findOne({ userId: payload.id, refreshToken });
         if (!session)
             throw new Error('Invalid session');
+        // @ts-expect-error -- config.jwtSecret is a string
         const newAccess = jsonwebtoken_1.default.sign({ id: payload.id }, config_1.default.jwtSecret, {
             expiresIn: config_1.default.accessExpire,
         });

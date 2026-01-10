@@ -48,6 +48,7 @@
 // export default router;
 
 import express from 'express';
+// @ts-expect-error -- multer is not typed
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
@@ -157,7 +158,7 @@ app.post('/image', upload.single('file'), (req: any, res: any) => {
     res.status(500).json({
       success: false,
       message: 'Error uploading file',
-      error: error.message,
+      error: error instanceof Error ? error.message : 'Unknown error',
     });
   }
 });
@@ -189,7 +190,7 @@ app.post('/api/upload-multiple', upload.array('files', 5), (req: any, res: any) 
     res.status(500).json({
       success: false,
       message: 'Error uploading files',
-      error: error.message,
+      error: error instanceof Error ? error.message : 'Unknown error',
     });
   }
 });

@@ -45,6 +45,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 // });
 // export default router;
 const express_1 = __importDefault(require("express"));
+// @ts-expect-error -- multer is not typed
 const multer_1 = __importDefault(require("multer"));
 const path_1 = __importDefault(require("path"));
 const fs_1 = __importDefault(require("fs"));
@@ -140,7 +141,7 @@ app.post('/image', upload.single('file'), (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Error uploading file',
-            error: error.message,
+            error: error instanceof Error ? error.message : 'Unknown error',
         });
     }
 });
@@ -170,7 +171,7 @@ app.post('/api/upload-multiple', upload.array('files', 5), (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Error uploading files',
-            error: error.message,
+            error: error instanceof Error ? error.message : 'Unknown error',
         });
     }
 });
